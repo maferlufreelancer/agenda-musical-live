@@ -119,21 +119,21 @@ const SearchMusicians = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Encontre Músicos Profissionais</h1>
-          <p className="text-gray-600">Descubra talentos incríveis para o seu evento</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Encontre Músicos Profissionais</h1>
+          <p className="text-muted-foreground">Descubra talentos incríveis para o seu evento - pague apenas por apresentação</p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <div className="bg-card p-6 rounded-lg shadow-sm mb-8 border border-border">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="lg:col-span-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Buscar por nome ou estilo musical..."
                   value={searchTerm}
@@ -181,7 +181,7 @@ const SearchMusicians = () => {
           </div>
           
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               {filteredMusicians.length} músicos encontrados
             </p>
             <Button
@@ -213,15 +213,15 @@ const SearchMusicians = () => {
                       className="h-16 w-16 rounded-full object-cover"
                     />
                     {musician.verified && (
-                      <div className="absolute -top-1 -right-1 bg-blue-600 rounded-full p-1">
-                        <Music className="h-3 w-3 text-white" />
+                      <div className="absolute -top-1 -right-1 bg-primary rounded-full p-1">
+                        <Music className="h-3 w-3 text-primary-foreground" />
                       </div>
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{musician.name}</h3>
-                    <p className="text-gray-600 text-sm">{musician.style}</p>
-                    <div className="flex items-center text-sm text-gray-500 mt-1">
+                    <h3 className="font-semibold text-lg text-card-foreground">{musician.name}</h3>
+                    <p className="text-muted-foreground text-sm">{musician.style}</p>
+                    <div className="flex items-center text-sm text-muted-foreground mt-1">
                       <MapPin className="h-3 w-3 mr-1" />
                       {musician.city}, {musician.state}
                     </div>
@@ -230,13 +230,13 @@ const SearchMusicians = () => {
 
                 <div className="flex items-center mb-3">
                   <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="font-medium">{musician.rating}</span>
-                    <span className="text-gray-500 text-sm">({musician.reviews} avaliações)</span>
+                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                    <span className="font-medium text-card-foreground">{musician.rating}</span>
+                    <span className="text-muted-foreground text-sm">({musician.reviews} avaliações)</span>
                   </div>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{musician.bio}</p>
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{musician.bio}</p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {musician.services.slice(0, 3).map(service => (
@@ -253,11 +253,11 @@ const SearchMusicians = () => {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-blue-600">{musician.price}</p>
-                    <p className="text-xs text-gray-500">por evento</p>
+                    <p className="font-semibold text-primary">{musician.price}</p>
+                    <p className="text-xs text-muted-foreground">por evento</p>
                   </div>
                   <Link to={`/musician/${musician.id}`}>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                    <Button size="sm">
                       Ver Perfil
                     </Button>
                   </Link>
@@ -269,9 +269,9 @@ const SearchMusicians = () => {
 
         {filteredMusicians.length === 0 && (
           <div className="text-center py-12">
-            <Music className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum músico encontrado</h3>
-            <p className="text-gray-600">Tente ajustar os filtros de busca ou limpar os critérios.</p>
+            <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">Nenhum músico encontrado</h3>
+            <p className="text-muted-foreground">Tente ajustar os filtros de busca ou limpar os critérios.</p>
           </div>
         )}
       </div>
