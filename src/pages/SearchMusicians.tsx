@@ -1,13 +1,16 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import Header from '@/components/Header';
-import { Search, MapPin, Star, Music, Filter } from 'lucide-react';
+import { Search, MapPin, Star, Music, Filter, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const SearchMusicians = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,108 +18,64 @@ const SearchMusicians = () => {
   const [selectedStyle, setSelectedStyle] = useState('');
   const [selectedService, setSelectedService] = useState('');
 
-  const mockMusicians = [
-    {
-      id: 1,
-      name: 'João Silva',
-      style: 'Rock/Blues',
-      city: 'São Paulo',
-      state: 'SP',
-      rating: 4.8,
-      reviews: 24,
-      services: ['Shows', 'Aulas', 'Gravações'],
-      price: 'R$ 500-800',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-      bio: 'Guitarrista profissional com 10+ anos de experiência',
-      verified: true
-    },
-    {
-      id: 2,
-      name: 'Maria Santos',
-      style: 'Clássica/MPB',
-      city: 'Rio de Janeiro',
-      state: 'RJ',
-      rating: 4.9,
-      reviews: 31,
-      services: ['Casamentos', 'Eventos', 'Aulas'],
-      price: 'R$ 800-1200',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b1c1?w=150&h=150&fit=crop&crop=face',
-      bio: 'Violinista clássica especializada em eventos elegantes',
-      verified: true
-    },
-    {
-      id: 3,
-      name: 'Pedro Costa',
-      style: 'Eletrônica/Pop',
-      city: 'Belo Horizonte',
-      state: 'MG',
-      rating: 4.7,
-      reviews: 18,
-      services: ['DJ', 'Festas', 'Corporativo'],
-      price: 'R$ 400-600',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-      bio: 'DJ e produtor musical especializado em eventos',
-      verified: false
-    },
-    {
-      id: 4,
-      name: 'Ana Lima',
-      style: 'Jazz/Bossa Nova',
-      city: 'Salvador',
-      state: 'BA',
-      rating: 4.6,
-      reviews: 15,
-      services: ['Shows', 'Bares', 'Hotéis'],
-      price: 'R$ 600-900',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-      bio: 'Cantora de jazz com repertório internacional',
-      verified: true
-    },
-    {
-      id: 5,
-      name: 'Carlos Drummond',
-      style: 'Sertanejo/Country',
-      city: 'Goiânia',
-      state: 'GO',
-      rating: 4.5,
-      reviews: 22,
-      services: ['Shows', 'Rodeios', 'Festas'],
-      price: 'R$ 700-1000',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
-      bio: 'Violeiro e cantor sertanejo raiz',
-      verified: true
-    },
-    {
-      id: 6,
-      name: 'Beatriz Oliveira',
-      style: 'Gospel/Worship',
-      city: 'Brasília',
-      state: 'DF',
-      rating: 4.9,
-      reviews: 27,
-      services: ['Cultos', 'Casamentos', 'Eventos'],
-      price: 'R$ 300-500',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
-      bio: 'Cantora gospel com ministério de adoração',
-      verified: true
-    },
-  ];
-
-  const cities = ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Salvador', 'Goiânia', 'Brasília'];
-  const styles = ['Rock/Blues', 'Clássica/MPB', 'Eletrônica/Pop', 'Jazz/Bossa Nova', 'Sertanejo/Country', 'Gospel/Worship'];
-  const services = ['Shows', 'Aulas', 'Gravações', 'Casamentos', 'Eventos', 'DJ', 'Festas'];
-
-  const filteredMusicians = mockMusicians.filter(musician => {
-    const matchesSearch = musician.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         musician.style.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCity = !selectedCity || musician.city === selectedCity;
-    const matchesStyle = !selectedStyle || musician.style.includes(selectedStyle);
-    const matchesService = !selectedService || musician.services.some(service => 
-      service.toLowerCase().includes(selectedService.toLowerCase())
-    );
-    
-    return matchesSearch && matchesCity && matchesStyle && matchesService;
+  // Fetch musicians from Supabase
+  const { data: musicians, isLoading, error } = useQuery({
+    queryKey: ['musicians'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('musicians')
+        .select('*')
+        .order('rating', { ascending: false });
+      
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar músicos",
+          description: error.message
+        });
+        throw error;
+      }
+      
+      return data;
+    }
   });
+
+  // Extract unique values for filters
+  const { cities, styles, services } = useMemo(() => {
+    if (!musicians) return { cities: [], styles: [], services: [] };
+    
+    const citiesSet = new Set<string>();
+    const stylesSet = new Set<string>();
+    const servicesSet = new Set<string>();
+    
+    musicians.forEach(musician => {
+      citiesSet.add(musician.city);
+      musician.musical_styles?.forEach((style: string) => stylesSet.add(style));
+      musician.services?.forEach((service: string) => servicesSet.add(service));
+    });
+    
+    return {
+      cities: Array.from(citiesSet).sort(),
+      styles: Array.from(stylesSet).sort(),
+      services: Array.from(servicesSet).sort()
+    };
+  }, [musicians]);
+
+  const filteredMusicians = useMemo(() => {
+    if (!musicians) return [];
+    
+    return musicians.filter(musician => {
+      const matchesSearch = musician.stage_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           musician.musical_styles?.some((style: string) => 
+                             style.toLowerCase().includes(searchTerm.toLowerCase())
+                           );
+      const matchesCity = !selectedCity || musician.city === selectedCity;
+      const matchesStyle = !selectedStyle || musician.musical_styles?.includes(selectedStyle);
+      const matchesService = !selectedService || musician.services?.includes(selectedService);
+      
+      return matchesSearch && matchesCity && matchesStyle && matchesService;
+    });
+  }, [musicians, searchTerm, selectedCity, selectedStyle, selectedService]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -200,74 +159,124 @@ const SearchMusicians = () => {
           </div>
         </div>
 
-        {/* Musicians Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMusicians.map(musician => (
-            <Card key={musician.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4 mb-4">
-                  <div className="relative">
-                    <img
-                      src={musician.avatar}
-                      alt={musician.name}
-                      className="h-16 w-16 rounded-full object-cover"
-                    />
-                    {musician.verified && (
-                      <div className="absolute -top-1 -right-1 bg-primary rounded-full p-1">
-                        <Music className="h-3 w-3 text-primary-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-card-foreground">{musician.name}</h3>
-                    <p className="text-muted-foreground text-sm">{musician.style}</p>
-                    <div className="flex items-center text-sm text-muted-foreground mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {musician.city}, {musician.state}
+        {/* Loading State */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <Card key={n}>
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4 mb-4">
+                    <Skeleton className="h-16 w-16 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-2/3" />
                     </div>
                   </div>
-                </div>
-
-                <div className="flex items-center mb-3">
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    <span className="font-medium text-card-foreground">{musician.rating}</span>
-                    <span className="text-muted-foreground text-sm">({musician.reviews} avaliações)</span>
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-full mb-4" />
+                  <div className="flex gap-2 mb-4">
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-6 w-16" />
                   </div>
-                </div>
+                  <Skeleton className="h-10 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{musician.bio}</p>
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <Music className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">Erro ao carregar músicos</h3>
+            <p className="text-muted-foreground mb-4">Tente novamente mais tarde.</p>
+            <Button onClick={() => window.location.reload()}>
+              Recarregar
+            </Button>
+          </div>
+        )}
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {musician.services.slice(0, 3).map(service => (
-                    <Badge key={service} variant="secondary" className="text-xs">
-                      {service}
-                    </Badge>
-                  ))}
-                  {musician.services.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{musician.services.length - 3}
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-primary">{musician.price}</p>
-                    <p className="text-xs text-muted-foreground">por evento</p>
+        {/* Musicians Grid */}
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMusicians.map(musician => (
+              <Card key={musician.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4 mb-4">
+                    <div className="relative">
+                      <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
+                        <Music className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      {musician.verified && (
+                        <div className="absolute -top-1 -right-1 bg-primary rounded-full p-1">
+                          <Music className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg text-card-foreground">{musician.stage_name}</h3>
+                      <p className="text-muted-foreground text-sm">
+                        {musician.musical_styles?.join(', ') || 'Vários estilos'}
+                      </p>
+                      <div className="flex items-center text-sm text-muted-foreground mt-1">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {musician.city}, {musician.state}
+                      </div>
+                    </div>
                   </div>
-                  <Link to={`/musician/${musician.id}`}>
-                    <Button size="sm">
-                      Ver Perfil
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
 
-        {filteredMusicians.length === 0 && (
+                  <div className="flex items-center mb-3">
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      <span className="font-medium text-card-foreground">
+                        {musician.rating ? Number(musician.rating).toFixed(1) : '0.0'}
+                      </span>
+                      <span className="text-muted-foreground text-sm">
+                        ({musician.total_reviews || 0} avaliações)
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                    {musician.bio || 'Músico profissional'}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {musician.services?.slice(0, 3).map((service: string) => (
+                      <Badge key={service} variant="secondary" className="text-xs">
+                        {service}
+                      </Badge>
+                    ))}
+                    {musician.services && musician.services.length > 3 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{musician.services.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-primary">
+                        R$ {musician.price_min}-{musician.price_max}
+                      </p>
+                      <p className="text-xs text-muted-foreground">por evento</p>
+                    </div>
+                    <Link to={`/musician/${musician.id}`}>
+                      <Button size="sm">
+                        Ver Perfil
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && !error && filteredMusicians.length === 0 && (
           <div className="text-center py-12">
             <Music className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">Nenhum músico encontrado</h3>
