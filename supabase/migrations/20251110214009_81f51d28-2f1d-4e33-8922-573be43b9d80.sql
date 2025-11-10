@@ -1,0 +1,8 @@
+-- Insert sample musicians data for testing
+INSERT INTO public.musicians (stage_name, bio, city, state, musical_styles, services, price_min, price_max, rating, total_reviews, verified) VALUES
+('João Silva', 'Guitarrista profissional com 10+ anos de experiência em shows e eventos', 'São Paulo', 'SP', ARRAY['Rock', 'Blues', 'Pop'], ARRAY['Shows', 'Aulas', 'Gravações'], 500, 800, 4.8, 24, true),
+('Maria Santos', 'Violinista clássica especializada em eventos elegantes e casamentos', 'Rio de Janeiro', 'RJ', ARRAY['Clássica', 'MPB'], ARRAY['Casamentos', 'Eventos', 'Aulas'], 800, 1200, 4.9, 31, true),
+('Pedro Costa', 'DJ e produtor musical especializado em festas e eventos corporativos', 'Belo Horizonte', 'MG', ARRAY['Eletrônica', 'Pop', 'House'], ARRAY['DJ', 'Festas', 'Corporativo'], 400, 600, 4.7, 18, false),
+('Ana Lima', 'Cantora de jazz com repertório internacional e experiência em bares e hotéis', 'Salvador', 'BA', ARRAY['Jazz', 'Bossa Nova', 'Soul'], ARRAY['Shows', 'Bares', 'Hotéis'], 600, 900, 4.6, 15, true),
+('Carlos Drummond', 'Violeiro e cantor sertanejo raiz, ideal para rodeios e festas', 'Goiânia', 'GO', ARRAY['Sertanejo', 'Country', 'Raiz'], ARRAY['Shows', 'Rodeios', 'Festas'], 700, 1000, 4.5, 22, true),
+('Beatriz Oliveira', 'Cantora gospel com ministério de adoração para cultos e eventos religiosos', 'Brasília', 'DF', ARRAY['Gospel', 'Worship', 'Contemporâneo'], ARRAY['Cultos', 'Casamentos', 'Eventos'], 300, 500, 4.9, 27, true);
