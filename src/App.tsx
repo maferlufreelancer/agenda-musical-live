@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
+import Auth from "./pages/Auth";
 import RegisterMusician from "./pages/RegisterMusician";
 import RegisterClient from "./pages/RegisterClient";
 import MusicianDashboard from "./pages/MusicianDashboard";
@@ -15,6 +15,7 @@ import SearchMusicians from "./pages/SearchMusicians";
 import MusicianProfile from "./pages/MusicianProfile";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -27,14 +28,14 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/register/musician" element={<RegisterMusician />} />
             <Route path="/register/client" element={<RegisterClient />} />
-            <Route path="/dashboard/musician" element={<MusicianDashboard />} />
-            <Route path="/dashboard/client" element={<ClientDashboard />} />
-            <Route path="/dashboard/admin" element={<AdminDashboard />} />
-            <Route path="/musicians" element={<SearchMusicians />} />
-            <Route path="/musician/:id" element={<MusicianProfile />} />
+            <Route path="/musicians" element={<ProtectedRoute><SearchMusicians /></ProtectedRoute>} />
+            <Route path="/musician/:id" element={<ProtectedRoute><MusicianProfile /></ProtectedRoute>} />
+            <Route path="/dashboard/musician" element={<ProtectedRoute><MusicianDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/client" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

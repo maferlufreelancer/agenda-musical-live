@@ -30,7 +30,7 @@ const RegisterMusician = () => {
     portfolioLinks: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
+  const { signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -76,7 +76,7 @@ const RegisterMusician = () => {
     }
 
     setIsLoading(true);
-    const success = await register(formData, 'musician');
+    const success = await signUp(formData.email, formData.password, formData.name, 'musician');
     
     if (success) {
       toast({
@@ -293,7 +293,7 @@ const RegisterMusician = () => {
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
                   Já tem uma conta?{' '}
-                  <Link to="/login" className="text-blue-600 hover:underline">
+                  <Link to="/auth" className="text-blue-600 hover:underline">
                     Fazer login
                   </Link>
                 </p>

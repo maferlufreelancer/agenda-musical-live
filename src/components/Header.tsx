@@ -15,8 +15,9 @@ const Header = () => {
   };
 
   const getDashboardPath = () => {
-    if (!user) return '/login';
-    return `/dashboard/${user.type}`;
+    if (!user) return '/auth';
+    const userType = user.user_metadata?.user_type || 'client';
+    return `/dashboard/${userType}`;
   };
 
   return (
@@ -55,18 +56,18 @@ const Header = () => {
                 </Link>
                 <div className="flex items-center space-x-2">
                   <img 
-                    src={user.avatar || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face`}
-                    alt={user.name}
+                    src={user.user_metadata?.avatar_url || `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face`}
+                    alt={user.user_metadata?.full_name || user.email || 'User'}
                     className="h-8 w-8 rounded-full"
                   />
-                  <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                  <span className="text-sm font-medium text-gray-700">{user.user_metadata?.full_name || user.email}</span>
                   <Button variant="ghost" size="sm" onClick={handleLogout}>
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </div>
               </>
             ) : (
-              <Link to="/login">
+              <Link to="/auth">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                   <User className="h-4 w-4 mr-2" />
                   Entrar

@@ -74,6 +74,61 @@ export type Database = {
           },
         ]
       }
+      musician_applications: {
+        Row: {
+          booking_id: string | null
+          client_id: string
+          created_at: string
+          id: string
+          message: string | null
+          musician_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          musician_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          musician_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "musician_applications_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "musician_applications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "musician_applications_musician_id_fkey"
+            columns: ["musician_id"]
+            isOneToOne: false
+            referencedRelation: "musicians"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       musicians: {
         Row: {
           bio: string | null

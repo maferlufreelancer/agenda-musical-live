@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
@@ -14,7 +13,6 @@ import { Music } from 'lucide-react';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userType, setUserType] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
@@ -23,7 +21,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password || !userType) {
+    if (!email || !password) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos.",
@@ -33,14 +31,14 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    const success = await login(email, password, userType);
+    const success = await login(email, password);
     
     if (success) {
       toast({
         title: "Sucesso!",
         description: "Login realizado com sucesso.",
       });
-      navigate(userType === 'admin' ? '/dashboard/admin' : `/dashboard/${userType}`);
+      navigate('/musicians');
     } else {
       toast({
         title: "Erro",
@@ -67,20 +65,6 @@ const Login = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="userType">Tipo de usuário</Label>
-                <Select value={userType} onValueChange={setUserType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo de usuário" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="musician">Músico</SelectItem>
-                    <SelectItem value="client">Cliente/Empresa</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
               <div>
                 <Label htmlFor="email">E-mail</Label>
                 <Input
@@ -128,9 +112,7 @@ const Login = () => {
               </div>
               
               <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
-                <p><strong>Para testar:</strong></p>
-                <p>Admin: admin@admin.com / admin123</p>
-                <p>Qualquer outro email para músico/cliente</p>
+                <p><strong>Dica:</strong> Crie uma conta nova para testar!</p>
               </div>
             </div>
           </CardContent>
